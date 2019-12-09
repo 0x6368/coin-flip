@@ -12,14 +12,14 @@ from joblib import Parallel, delayed
 
 
 def main():
-    number_of_coins = 30
+    number_of_coins = 200
 
     start = time.time()
 
     throws = []
     number_of_dealers = number_of_coins#math.ceil(number_of_coins / 2)
 
-    number_of_throws = 10**5
+    number_of_throws = 2**15
 
     if number_of_throws < 2**number_of_coins:
         print('Generating random throws...')
