@@ -2,11 +2,12 @@ import logging
 import time
 
 from dealer import Dealer
+import numpy as np
 
 
 class Simulation:
     @staticmethod
-    def simulate_throw(throw, number_of_coins, number_of_throws, dealers):
+    def simulate_throw(throw, number_of_coins, number_of_throws, number_of_dealers):
         paper_value = bin(throw).count("1")
         logging.info(f'Throw: {throw:0{number_of_coins}b} - Value: {paper_value:.2f}')
 
@@ -14,14 +15,19 @@ class Simulation:
         number_of_sellers = 0
         number_of_buyers = 0
 
-        for dealer in dealers:
-            description = dealer.get_description()
-            estimated_value = Dealer.get_estimated_inner_value(throw, dealer.number, number_of_coins)
-            average_estimation += estimated_value / number_of_coins
+        estimates = np.zeros(number_of_dealers)
+        profits = np.zeros(number_of_dealers)
+
+        for dealer in range(0, number_of_dealers):
+            description = Dealer.get_description(dealer)
+            estimated_value = Dealer.get_estimated_inner_value(throw, dealer, number_of_coins)
+            average_estimation += estimated_value / number_of_dealers
+            estimates[dealer] = estimated_value
             logging.debug(f'{description}: {estimated_value:09.4f}')
 
-        for dealer in dealers:
-            if dealer.will_sell(average_estimation):
+        for dealer in range(0, number_of_dealers):
+            estimated_value = estimates[dealer]
+            if Dealer.will_sell(average_estimation, estimated_value):
                 number_of_sellers += 1
             else:
                 number_of_buyers += 1
@@ -38,11 +44,13 @@ class Simulation:
             real_profit = profit
             real_loss = - profit
 
-        for dealer in dealers:
-            if dealer.will_sell(average_estimation):
-                dealer.add_profit(real_profit / number_of_throws)
+        for dealer in range(0, number_of_dealers):
+            estimated_value = estimates[dealer]
+            if Dealer.will_sell(average_estimation, estimated_value):
+                profits[dealer] += real_profit / number_of_throws
             else:
-                dealer.add_profit(real_loss / number_of_throws)
+                profits[dealer] += real_loss / number_of_throws
 
         logging.info(f'Average estimation: {average_estimation:.4f}\n')
         logging.info('===============\n')
+        return profits

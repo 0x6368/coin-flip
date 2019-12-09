@@ -1,15 +1,14 @@
 #!/bin/env python3
-import copy
+import math
 
 import numpy as np
 from dealer import Dealer
-from dealer import CleverDealer
 from simulation import Simulation
 import time
 from tqdm import tqdm
 from bit import get_rand_number
-import logging
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
 
 
 def main():
@@ -18,9 +17,9 @@ def main():
     start = time.time()
 
     throws = []
-    dealers = []
+    number_of_dealers = number_of_coins#math.ceil(number_of_coins / 2)
 
-    number_of_throws = 10**6
+    number_of_throws = 10**5
 
     if number_of_throws < 2**number_of_coins:
         print('Generating random throws...')
@@ -29,32 +28,30 @@ def main():
     else:
         throws = range(0, 2**number_of_coins)
 
-    for i in range(0, number_of_coins):
-        if False and i == 2:
-            dealer = CleverDealer(i, number_of_coins)
-        else:
-            dealer = Dealer(i, number_of_coins)
-        dealers.append(dealer)
-
     print('Simulating throws...')
-    for throw in tqdm(throws):
-        Simulation.simulate_throw(throw, number_of_coins, number_of_throws, dealers)
+    cumulated_profits = np.zeros(number_of_dealers)
+    profits = Parallel(n_jobs=12)(
+        delayed(Simulation.simulate_throw)(throw, number_of_coins, number_of_throws, number_of_dealers) for throw in tqdm(throws)
+    )
+
+    for profits_single_simulation in profits:
+        cumulated_profits += profits_single_simulation
 
     y_values = []
     x_values = []
     print('')
-    for dealer in dealers:
-        description = dealer.get_description()
-        profit = dealer.profit
+    for dealer in range(0, number_of_dealers):
+        description = Dealer.get_description(dealer)
+        profit = cumulated_profits[dealer]
         y_values.append(profit)
-        x_values.append(dealer.number / number_of_coins)
+        x_values.append(dealer / number_of_coins)
         print(f'{description}: {profit: 6.4f}')
 
     end = time.time()
 
     plt.plot(x_values, y_values)
     plt.ylabel('profit')
-    plt.xlabel('information')
+    plt.xlabel(f'information\nnumber of coins: {number_of_coins}\nnumber of trades: {number_of_throws}')
     plt.axhline(y=0, color='r', linestyle='-')
     plt.show()
 

@@ -193,23 +193,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-### VirtualEnv ###
-# Virtualenv
-# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
-[Bb]in
-[Ii]nclude
-[Ll]ib
-[Ll]ib64
-[Ll]ocal
-[Ss]cripts
-pyvenv.cfg
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-pip-selfcheck.json
-
-# End of https://www.gitignore.io/api/python,virtualenv<Plug>PeepOpenycharm+all
+# End of https://www.gitignore.io/api/python,<Plug>PeepOpenycharm+all
+/venv/

@@ -2,12 +2,6 @@ from bit import nth_bit
 
 
 class Dealer:
-    def __init__(self, number, number_of_coins):
-        self.number = number
-        self.number_of_coins = number_of_coins
-        self.estimated_inner_value = None
-        self.profit = 0
-
     @staticmethod
     def get_estimated_inner_value(throw, number, number_of_coins):
         estimate = 0
@@ -18,25 +12,22 @@ class Dealer:
         unknown_coins = number_of_coins - number
         estimate += unknown_coins * 0.5
 
-        return estimate# / self.number_of_coins * 10
+        return estimate# / number_of_coins * 10
 
-    def get_description(self):
-        return f'H{self.number:04d}'
+    @staticmethod
+    def get_description(number):
+        return f'H{number:04d}'
 
-    def will_sell(self, price):
-        if self.estimated_inner_value is None:
-            raise Exception('You have to call get_estimated_inner_value() first')
+    @staticmethod
+    def will_sell(price, estimated_inner_value):
+        if price > estimated_inner_value:
+            return True
         else:
-            if price > self.estimated_inner_value:
-                return True
-            else:
-                return False
-
-    def add_profit(self, profit):
-        self.profit += profit
+            return False
 
 
 class CleverDealer(Dealer):
-    def will_sell(self, price):
-        should_sell = Dealer.will_sell(self, price)
+    @staticmethod
+    def will_sell(price, estimated_inner_value):
+        should_sell = Dealer.will_sell(price, estimated_inner_value)
         return not should_sell
